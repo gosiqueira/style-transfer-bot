@@ -1,4 +1,5 @@
 import copy
+import os
 
 import torch
 from matplotlib import pyplot as plt
@@ -6,8 +7,8 @@ from PIL import Image
 from torch import nn, optim
 from torchvision import transforms
 
-from layers import Normalization
-from losses import ContentLoss, StyleLoss
+from .layers import Normalization
+from .losses import ContentLoss, StyleLoss
 
 
 # desired depth layers to compute style/content losses :
@@ -15,19 +16,27 @@ content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
 
-def image_loader(image_name):
-    image = Image.open(image_name)
+def image_loader(impath):
+    if os.path.exists(impath):
+        image = Image.open(impath)
+    else:
+        image = None
+    return image
+
+
+def unload_image(tensor):
+    unloader = transforms.ToPILImage()
+    if torch.cuda.is_available():
+        tensor = tensor.cpu()
+    image = tensor.clone()              
+    image = image.squeeze(0)            
+    image = unloader(image)
     return image
 
 
 def imshow(tensor, title=None):
-    unloader = transforms.ToPILImage()
     if isinstance(tensor, torch.Tensor):
-        if torch.cuda.is_available():
-            tensor = tensor.cpu()
-        image = tensor.clone()              
-        image = image.squeeze(0)            
-        image = unloader(image)
+        image = unload_image(tensor)
     else:
         image = tensor
 

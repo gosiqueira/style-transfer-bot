@@ -2,7 +2,8 @@ import torch
 from matplotlib import pyplot as plt
 from torchvision import models, transforms
 
-from utils import *
+from .utils import (get_input_optimizer, get_style_model_and_losses,
+                   image_loader, imshow)
 
 
 def transfer(style_img, content_img):
@@ -12,8 +13,8 @@ def transfer(style_img, content_img):
     imsize = 512 if torch.cuda.is_available() else 128  # use small size if no gpu
 
     loader = transforms.Compose([
-        transforms.Resize(imsize),  # scale imported image
-        transforms.ToTensor()       # transform it into a torch tensor
+        transforms.Resize((imsize, imsize)),    # scale imported image
+        transforms.ToTensor()                   # transform it into a torch tensor
     ])  
 
     def prepare_image(image):
@@ -82,8 +83,8 @@ def transfer(style_img, content_img):
 
 
 def main():
-    style_img   = image_loader('data/picasso.jpg')
-    content_img = image_loader('data/dancing.jpg')
+    style_img   = image_loader('data/starry-night.jpg')
+    content_img = image_loader('data/me.jpg')
 
     plt.figure()
     imshow(style_img, title='Style Image')
