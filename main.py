@@ -3,6 +3,7 @@ import os
 from io import BytesIO
 
 from dotenv import dotenv_values
+from PIL import Image
 from telegram import ParseMode, ReplyKeyboardMarkup
 from telegram.ext import (CommandHandler, ConversationHandler, Filters,
                           MessageHandler, Updater)
@@ -84,8 +85,12 @@ def transfer_handler(update, context):
     style_img   = image_loader(f'source_{user_id}.jpg')
     content_img = image_loader(f'target_{user_id}.jpg')
 
+    content_size = content_img.size
+
     tensor_img = transfer(style_img, content_img)
     image = unload_image(tensor_img)
+
+    image = image.resize(content_size, Image.ANTIALIAS)
 
     bio = BytesIO()
     bio.name = f'result_{user_id}.jpeg'
