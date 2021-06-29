@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 from io import BytesIO
@@ -11,7 +12,6 @@ from telegram.ext import (CommandHandler, ConversationHandler, Filters,
 from src.style import transfer
 from src.utils import image_loader, unload_image
 
-logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 CHOOSING, SENDING_IMG, TYPING_REPLY = range(3)
@@ -25,6 +25,7 @@ markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
 
 
 def download_image(update, context, user_id, img_type='style'):
+    logging.debug(f'Downloading {img_type} image')
     if update.message.photo is None:
         update.message.reply_text('Please provide a **valid image**.',
             parse_mode=ParseMode.MARKDOWN)
@@ -37,6 +38,8 @@ def download_image(update, context, user_id, img_type='style'):
 
 
 def start_handler(update, context):
+    logging.debug('Starting /start handler')
+    logging.info(f'Start handler called by user {update.message.from_user.id}')
     """Start the conversation and ask user for input."""
     update.message.reply_text(
         'Hi! I\'m the _Neural Style Transfer bot_. I customize images using advanced machine learning.\n'
@@ -53,7 +56,9 @@ def start_handler(update, context):
 
 
 def choice_handler(update, context):
+    logging.debug('Starting choice handler')
     text = update.message.text.lower()
+    logging.info(f'User {update.message.from_user.id} selected {text}')
     context.user_data['choice'] = text
     update.message.reply_text(f'Send me the {text} image')
 
@@ -61,6 +66,7 @@ def choice_handler(update, context):
 
 
 def img_handler(update, context):
+    logging.debug('Starting img handler')
     user_id = update.message.from_user.id
     choice = context.user_data['choice']
 
@@ -73,7 +79,7 @@ def img_handler(update, context):
 
 
 def transfer_handler(update, context):
-    logger.info('Transfer routine called')
+    logging.debug('Starting transfer handler')
     user_data = context.user_data
     if 'choice' in user_data:
         del user_data['choice']
@@ -82,7 +88,9 @@ def transfer_handler(update, context):
 
     update.message.reply_text('Stylizing your image...')
 
+    logging.debug('Loading style image')
     style_img   = image_loader(f'source_{user_id}.jpg')
+    logging.debug('Loading content image')
     content_img = image_loader(f'target_{user_id}.jpg')
 
     content_size = content_img.size
@@ -97,17 +105,21 @@ def transfer_handler(update, context):
     image.save(bio, 'JPEG')
     bio.seek(0)
 
+    logging.debug('Sending image to user')
     update.message.reply_text('Here goes your stylized image...')
     context.bot.send_photo(update.message.chat_id, bio)
 
+    logging.debug('Deleting user\'s images')
     os.remove(f'source_{user_id}.jpg')
     os.remove(f'target_{user_id}.jpg')
 
+    logging.debug('Cleaning user\'s data')
     user_data.clear()
     return ConversationHandler.END
 
 
 def help_handler(update, context):
+    logging.debug('Starting /help handler')
     response = [
         'Hello, I\'m _Neural Style Transfer Bot_!\n',
         'I apply the style from a source image to the content of a target image.',
@@ -158,4 +170,14 @@ def main():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Neural Style Transfer Bot')
+    parser.add_argument('--debug', action='store_true', help='Debug flag')
+
+    args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.DEBUG)
+    else:
+        logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.INFO)
+
     main()
