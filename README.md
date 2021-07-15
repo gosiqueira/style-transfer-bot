@@ -1,6 +1,6 @@
 # Style Transfer Bot for Telegram
 
-<img align="right" src="https://lh3.googleusercontent.com/proxy/C7BLHPW1vjU9UyCE2aza90yuOCGnEP5Z1tOWsHCn4RCiksmBrXfgJKn9G-NiipcwY3sUnYnOs-HAfzyu-1KJoLYHeelV" width=400>
+<img align="right" src="https://miro.medium.com/max/2166/1*8bbp3loQjkLXaIm_QBfD8w.jpeg" width=400>
 
 Neural Style Transfer (NST) refers to a class of software algorithms that manipulate digital images, or videos, in order to adopt the appearance or visual style of another image. NST algorithms are characterized by their use of deep neural networks for the sake of image transformation. Common uses for NST are the creation of artificial artwork from photographs, for example by transferring the appearance of famous paintings to user-supplied photographs. Several notable mobile apps use NST techniques for this purpose, including [DeepArt](https://deepart.io/) and [Prisma](https://prisma-ai.com/). This method has been used by artists and designers around the globe to develop new artwork based on existent style(s).
 
